@@ -89,6 +89,7 @@ intersections.
 
 ## 3.0 Study Area Description
 ![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/1.png)
+
 Study area in this project is the city of Vancouver. It contains 17013 public streets,
 6092 street intersections, 100851 property addresses, 264 parks, 194 schools and 21
 libraries and all of these data mentioned are analyzed in the project. For other data
@@ -146,56 +147,93 @@ explanations of core python scripts.
 *Step 1: Store street intersections*
 
 Street intersections are consisted of the whole city network so the first thing is to
-store intersections attributes from shape file into an array. A function is created and
-the python scripts is below:
+store intersections attributes from shape file into an array. A three dimensional list called ‘data’ has been created containing three attributes which are feature ID of intersections and their X Y coordinates separately. From the
+for loop, the range is 6970 which means there are 6970 intersections in Vancouver and
+these intersections information have been stored in list ‘data’. For spatial data analysis,
+it is not wise to process all intersections because it may cost a long time. Next section
+will illustrate how to select specific region containing few intersections according to
+users input data to reduce unnecessary process, the selected region of streets and
+details of operations.
 
-def store_street_intersections():
+*Step 2: Collect necessary spatial data from input*
 
-data = []
+According to input user address ID, it is efficient to use a search cursor in address
+shape file and easily get XY coordinate from FID. A part of property_addresses
+attribute table and function are below:
 
-for i in xrange(6970):
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/8.png)
 
-data.append([])
+Due to the name domain in park is different from other two so we must use ‘if’ to
+select feature names. After this process, it can get the nearest place to user address.
+For example, if the user want to go to nearest park, for every park in our map, it
+contains its own XY coordinate. A part of of park_polygons attribute table is below:
 
-for j in xrange(3):
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/9.png)
 
-data[i].append([])
+Then a search cursor can be used for every single park to calculate the absolute
+distance 2
+1 2
+2
+1 2 (x  x )  ( y  y ) between every park (x1,x2) and user’s home (x2,y2)
+and then output the nearest one’s XY coordinate and name. For school and library,
+there are the same as park. So far, we have start point XY coordinate and destination
+XY coordinate with names.
 
-fc = "street_intersections.shp"
+*Step 3: Select region which should be analyzed from the map*
+This step is to avoid unnecessary processes because it need not always compute
+all intersections and streets data in Vancouver which may causes few minutes even
+Topic in GIS & Geoprocessing Final Project Report
+15 few hours. Therefore, a selected region should be assigned. For example, there are
+start point which is the red triangle and end point which is green rectangle in Figure 3.
+The original region is light red rectangle and processed region is dark rectangle after
+adding boundary for original region to make sure all intersections which may affect
+route calculation are covered. The minimum distance for boundary is 600 meters
+which has been tested for this number covering routes between all addresses and
+selected places.
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/10.png)
 
-cursor=arcpy.da.SearchCursor(fc,["FID","SHAPE@XY"])
+The next process is to store all intersections in this region into one list and all
+streets in this region into another list. Because there already exists a list containing all
+6970 intersections in data preprocessing, so this process just need to clip some of
+them from the whole intersections data set into a new list.
+When it comes to streets storing, it needs some operations to solve maker’s error
+in public street shape file. The purpose is to connect separated streets into a whole
+street. Function get_street below can both store streets data and process separated
+streets connections.
 
-for row in cursor:
+*Step 4: Create graph*
+For every intersection in the region, distances between every single intersection
+need to be created and then output the graph which is a three-dimensional list
+containing one start node, one end node and the distance between them. Function
+create_graph can yield the graph by input street intersections and streets in the
+selected region.
 
-num = row[0]
+*Step 5: Use Dijsktra algorithm to output the shortest route*
+In this section, scripts are from open source code online and have been some
+changes to be adapt to the whole project. In create_gragh function, the return data
+fromat has changed to [node1, node2, distance] to match input format in dijsktra algorithm function. The result of this function is a shortest route containing all passing nodes which is a list consisted of different pairs of intersection to intersection.
 
-x,y = row[1]
+*Step 6: Print navigation output*
+After getting the shortest path, it can print navigation information for users.
+Function navigation can show street names, street lengths and intersection positions.
+Due to the shortest path output does not contain street names only has
+intersections ID, the first two loops are to find XY coordinate of two intersections
+according to their ID. Then the next loop is to find the street which contains these two
+intersections. Then it can print street name and the distance how long users should go.
+In Canada, straight roads are classified into roads with same name without different
+numbers in front of them. So parameters ‘turn’ and ‘origin’ in this function are used to
+mark if the main street name has changed which means there is no longer straight
+road in there and then it can remind users may make a turn at the intersection.
 
-data[num][0] = num
+*Step 7: Create toolbox*
+Based on this script, there are some changes have been added and the project
+finally yields four different tools for users: 1. property addresses navigation which can
+provide navigation information from one property address to another address; 2.
+shortest route navigation which is from one property address to nearest park, school or
+library; 3. specified destination navigation gives users a path from property address to
+specific park, school or library; 4. two given places navigation offers a shortest route
+from one place to another place among parks, libraries and schools. For various input
+data types, four interfaces are different and they are shown below:
 
-data[num][1] = x
-
-data[num][2] = y
-
-del row
-
-del cursor
-
-return data
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/11.png)
 
