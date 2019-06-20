@@ -171,15 +171,13 @@ contains its own XY coordinate. A part of of park_polygons attribute table is be
 ![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/9.png)
 
 Then a search cursor can be used for every single park to calculate the absolute
-distance 2
-1 2
-2
-1 2 (x  x )  ( y  y ) between every park (x1,x2) and user’s home (x2,y2)
+distance between every park (x1,x2) and user’s home (x2,y2)
 and then output the nearest one’s XY coordinate and name. For school and library,
 there are the same as park. So far, we have start point XY coordinate and destination
 XY coordinate with names.
 
 *Step 3: Select region which should be analyzed from the map*
+
 This step is to avoid unnecessary processes because it need not always compute
 all intersections and streets data in Vancouver which may causes few minutes even
 Topic in GIS & Geoprocessing Final Project Report
@@ -202,6 +200,7 @@ street. Function get_street below can both store streets data and process separa
 streets connections.
 
 *Step 4: Create graph*
+
 For every intersection in the region, distances between every single intersection
 need to be created and then output the graph which is a three-dimensional list
 containing one start node, one end node and the distance between them. Function
@@ -209,11 +208,13 @@ create_graph can yield the graph by input street intersections and streets in th
 selected region.
 
 *Step 5: Use Dijsktra algorithm to output the shortest route*
+
 In this section, scripts are from open source code online and have been some
 changes to be adapt to the whole project. In create_gragh function, the return data
 fromat has changed to [node1, node2, distance] to match input format in dijsktra algorithm function. The result of this function is a shortest route containing all passing nodes which is a list consisted of different pairs of intersection to intersection.
 
 *Step 6: Print navigation output*
+
 After getting the shortest path, it can print navigation information for users.
 Function navigation can show street names, street lengths and intersection positions.
 Due to the shortest path output does not contain street names only has
@@ -226,14 +227,74 @@ mark if the main street name has changed which means there is no longer straight
 road in there and then it can remind users may make a turn at the intersection.
 
 *Step 7: Create toolbox*
+
 Based on this script, there are some changes have been added and the project
 finally yields four different tools for users: 1. property addresses navigation which can
 provide navigation information from one property address to another address; 2.
 shortest route navigation which is from one property address to nearest park, school or
 library; 3. specified destination navigation gives users a path from property address to
 specific park, school or library; 4. two given places navigation offers a shortest route
-from one place to another place among parks, libraries and schools. For various input
-data types, four interfaces are different and they are shown below:
+from one place to another place among parks, libraries and schools.
+
+## 6.0 Results and Discussion
+This section will illustrate two parts: the map created by ArcMap and results of
+navigation information for four different tools.
 
 ![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/11.png)
 
+The created map contains some of shape files such as public streets, park
+polygons, schools, libraries and so on in order to illustrate the view of whole city. It
+also includes some other data like rapid transit line with its stations because it plays
+an important role in city traffic though they have not been analyzed. For street
+intersections and property addresses, they are not included in the map because the
+large number of them may cause the whole map unclear to see and it is unnecessary
+for users to see these data but they are mainly processed by python scripts to create
+the navigation toolbox.
+
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/13.png)
+
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/14.png)
+
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/15.png)
+
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/16.png)
+
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/17.png)
+
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/18.png)
+
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/19.png)
+
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/20.png)
+
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/21.png)
+
+![alt text](https://github.com/zzzchaozzz/GIS/blob/master/img/22.png)
+
+## 7.0 Assumptions and Limitations
+This toolbox is created to handle all navigation among Vancouver so it may take a
+long time for large areas route calculation. Due to the core mind is to make a graph
+among street intersections, once the covered area is bigger, it needs more time to deal
+with the created graph. A new method is to upgrade the shortest route calculation
+called arc-flag approach which is based on Dijkstra’s algorithm to accelerate the route
+calculation. It contains a preprocessing of data in graph to divide into different regions
+and gather whether an arc is on a shortest path into a given region(Möhring, 2007). So
+the combination of appropriate partitioning and two direction search can make route
+calculation more efficient. In addition, the toolbox only can provide shortest path for
+drivers because it is based on public streets. For users who walk, skate or cycle, the
+process area should include non public streets and lanes and more than one graph
+should be generated with various decisions between different types of roads.
+
+## 8.0 Conclusion and Future Work
+The project provides route navigation from property addresses to nearest or
+specific schools, libraries and parks and also between two arbitrary given places
+among city of Vancouver. From attributes in different shape files, spatial data like XY
+coordinates of objects has been found to analyse and yield the toolbox. Also, the
+relationship between attributes in every shape file should be generated from object ID
+to its other attributes for getting access to all the information. From this project, I have
+gained knowledge in searching GIS data online, creating maps by ArcGIS, spatial data
+analysis, skills of Python Scripts programming especially in debugging public streets
+data sets where I found a digitizing error and it makes me understand GIS spatial data
+more clearly. In the future, I hope I could improve this navigation toolbox by adding
+lanes and non public street shape files to generate an advanced version of navigation
+toolbox both for drivers and pedestrians.
